@@ -1,4 +1,5 @@
 matrix:
+  # Remember to keep that in sync with appveyor.yml
   SBT_RUN:
     - sbt "+bridgeIntegration/cachedPublishLocal" \
           "benchmarks/compile" \
