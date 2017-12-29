@@ -248,6 +248,10 @@ object BuildImplementation {
           IO.createDirectory(testDir / "bloop-config")
           IO.write(testDir / "project" / "test-config.sbt", addSbtPlugin)
           IO.write(testDir / "test-config.sbt", createScriptedSetup(testDir))
+          println("#" * 100)
+          println("Writing to " + (testDir / "test-config.sbt") + ":")
+          println(createScriptedSetup(testDir))
+          println("#" * 100)
           IO.write(testDir / "test", scriptedTestContents)
         }
       },
