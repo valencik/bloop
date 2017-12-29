@@ -9,10 +9,10 @@ clone_script:
   - cmd: git checkout -qf %APPVEYOR_REPO_COMMIT%
 build_script:
   # Remember to keep that in sync with .drone.yml
-  - sbt "+bridgeIntegration/cachedPublishLocal" \
-        "benchmarks/compile" \
-        "git status" \
-        "setupTests" \
-        "git status" \
-        "backend/test" \
+  - sbt "+bridgeIntegration/cachedPublishLocal" ^
+        "benchmarks/compile" ^
+        "git status" ^
+        "setupTests" ^
+        "git status" ^
+        "backend/test" ^
         "frontend/test"
