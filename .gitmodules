@@ -2,6 +2,7 @@
 	path = zinc
 	url = https://github.com/scalacenter/zinc.git
 	branch = loop
+        ignore = dirty
 [submodule "nailgun"]
 	path = nailgun
 	url = https://github.com/scalacenter/nailgun.git
