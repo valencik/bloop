@@ -210,7 +210,7 @@ object BuildImplementation {
     }
 
     private def createScriptedSetup(testDir: File) = {
-      val tripleQuotedTestDir = "\"\"\"" + testDir + "\"\"\""
+      val tripleQuotedTestDir = "\"\"\"" + testDir.toString.replace("\\u", "\\\\u") + "\"\"\""
       s"""
          |bloopConfigDir in Global := file($tripleQuotedTestDir) / "bloop-config"
          |TaskKey[Unit]("registerDirectory") := {
