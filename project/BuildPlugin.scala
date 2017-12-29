@@ -211,10 +211,10 @@ object BuildImplementation {
 
     private def createScriptedSetup(testDir: File) = {
       s"""
-         |bloopConfigDir in Global := file("$testDir/bloop-config")
+         |bloopConfigDir in Global := file("$testDir") / "bloop-config"
          |TaskKey[Unit]("registerDirectory") := {
          |  val dir = (baseDirectory in ThisBuild).value
-         |  IO.write(file("$testDir/bloop-config/base-directory"), dir.getAbsolutePath)
+         |  IO.write(file("$testDir") / "bloop-config" / "base-directory", dir.getAbsolutePath)
          |}
          |TaskKey[Unit]("checkInstall") := {
          |  Thread.sleep(1000) // Let's wait a little bit because of OS's IO latency
