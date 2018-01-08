@@ -5,7 +5,7 @@
 [submodule "nailgun"]
 	path = nailgun
 	url = https://github.com/scalacenter/nailgun.git
-	branch = bloop
+	branch = bloop-2
 [submodule "frontend/src/test/resources/projects/sbt"]
 	path = frontend/src/test/resources/projects/sbt
 	url = https://github.com/scalacenter/sbt.git
