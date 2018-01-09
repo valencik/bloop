@@ -117,7 +117,14 @@ val mavenBloop = project
   .settings(name := "maven-bloop")
   .settings(BuildDefaults.mavenPluginBuildSettings)
 
-val allProjects = Seq(backend, benchmarks, frontend, integrationsCore, sbtBloop, mavenBloop)
+val gradleBloop = project
+  .in(file("integrations") / "gradle-bloop")
+  .dependsOn(integrationsCore)
+  .settings(BuildDefaults.gradlePluginBuildSettings)
+  .settings(name := "gradle-bloop")
+
+val allProjects =
+  Seq(backend, benchmarks, frontend, integrationsCore, sbtBloop, mavenBloop, gradleBloop)
 val allProjectReferences = allProjects.map(p => LocalProject(p.id))
 val bloop = project
   .in(file("."))

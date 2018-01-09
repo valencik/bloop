@@ -1,5 +1,6 @@
 package build
 
+import ch.epfl.scala.sbt.gradle.GradlePluginKeys
 import sbt.{AutoPlugin, Command, Def, Keys, PluginTrigger, Plugins}
 
 object BuildPlugin extends AutoPlugin {
@@ -249,6 +250,12 @@ object BuildImplementation {
         Dependencies.mavenScalaPlugin
           .withExplicitArtifacts(Vector(Artifact("scala-maven-plugin", "maven-plugin", "jar")))
       ),
+    )
+
+    val gradlePluginBuildSettings: Seq[Def.Setting[_]] = List(
+      GradlePluginKeys.gradlePlugin := true,
+      GradlePluginKeys.gradlePluginClass := Some("bloop.integrations.gradle.BloopPlugin"),
+      GradlePluginKeys.gradlePluginNamespace := Some("bloop.integrations.gradle")
     )
 
     val fixScalaVersionForSbtPlugin: Def.Initialize[String] = Def.setting {
