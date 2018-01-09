@@ -24,7 +24,7 @@
 [submodule "compiler-benchmark"]
 	path = benchmark-bridge
 	url = https://github.com/scalacenter/compiler-benchmark
-	branch = bloop
+	branch = bloop-updated
   ignore = dirty
 [submodule "frontend/src/test/resources/projects/scala"]
 	path = frontend/src/test/resources/projects/scala
