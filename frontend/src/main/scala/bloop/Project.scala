@@ -9,11 +9,14 @@ import bloop.io.{AbsolutePath, Paths}
 import bloop.io.Timer.timed
 import bloop.logging.Logger
 
+import xsbti.compile.ClasspathOptions
+
 case class Project(name: String,
                    baseDirectory: AbsolutePath,
                    dependencies: Array[String],
                    scalaInstance: ScalaInstance,
                    rawClasspath: Array[AbsolutePath],
+                   classpathOptions: ClasspathOptions,
                    classesDir: AbsolutePath,
                    scalacOptions: Array[String],
                    javacOptions: Array[String],
@@ -86,6 +89,12 @@ object Project {
       ScalaInstance(scalaOrganization, scalaName, scalaVersion, allScalaJars, logger)
     val classpath = toPaths(properties.getProperty("classpath"))
     val classesDir = toPath(properties.getProperty("classesDir"))
+    val classpathOptions = {
+      val values = properties.getProperty("classpathOptions").split(",")
+      val Array(bootLibrary, compiler, extra, autoBoot, filterLibrary) =
+        values.map(java.lang.Boolean.parseBoolean)
+      ClasspathOptions.of(bootLibrary, compiler, extra, autoBoot, filterLibrary)
+    }
     val scalacOptions =
       properties.getProperty("scalacOptions").split(";").filterNot(_.isEmpty)
     val javacOptions =
@@ -108,6 +117,7 @@ object Project {
       dependencies,
       scalaInstance,
       classpath,
+      classpathOptions,
       classesDir,
       scalacOptions,
       javacOptions,

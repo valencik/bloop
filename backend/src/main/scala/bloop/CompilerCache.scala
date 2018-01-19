@@ -15,13 +15,14 @@ class CompilerCache(componentProvider: ComponentProvider,
                     logger: Logger,
                     userResolvers: List[Resolver]) {
 
-  private val cache = new ConcurrentHashMap[ScalaInstance, Compilers]()
+  private type CompilerID = (ScalaInstance, ClasspathOptions)
+  private val cache = new ConcurrentHashMap[CompilerID, Compilers]()
 
-  def get(scalaInstance: ScalaInstance): Compilers =
-    cache.computeIfAbsent(scalaInstance, newCompilers)
+  def get(compilerID: CompilerID): Compilers =
+    cache.computeIfAbsent(compilerID, newCompilers)
 
-  private def newCompilers(scalaInstance: ScalaInstance): Compilers = {
-    val classpathOptions = ClasspathOptions.of(true, false, false, true, false)
+  private def newCompilers(compilerID: CompilerID): Compilers = {
+    val (scalaInstance, classpathOptions) = compilerID
     val compiler = getScalaCompiler(scalaInstance, classpathOptions, componentProvider)
     ZincUtil.compilers(scalaInstance, classpathOptions, None, compiler)
   }
