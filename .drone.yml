@@ -46,6 +46,7 @@ pipeline:
 
   build:
     image: scalacenter/scala-docs:1.1
+    group: build
     when:
       ref: [ refs/heads/master, refs/tags/*, refs/pull/*/head ]
     commands:
@@ -55,6 +56,16 @@ pipeline:
       - ./bin/detect-community-build.sh
       - ${SBT_RUN}
       - ./bin/ci-clean-cache.sh
+
+  build_windows:
+    group: build
+    image: scalacenter/scala-docs:1.0
+    when:
+      ref: [ refs/heads/master, refs/tags/*, refs/pull/*/head ]
+    secrets: [ bloop_jenkins_token ]
+    commands:
+      - ./bin/start-jenkins-job.sh "bloop:$BLOOP_JENKINS_TOKEN"
+      - ./bin/stream-jenkins-log.sh
 
   publish:
     image: scalacenter/scala-docs:1.1
