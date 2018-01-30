@@ -25,10 +25,14 @@ clone:
     tags: true
     recursive: true
     depth: 50
+    when:
+      ref: [ refs/heads/master, refs/tags/*, refs/pull/*/head ]
 
 pipeline:
   restore_cache:
     image: appleboy/drone-sftp-cache
+    when:
+      ref: [ refs/heads/master, refs/tags/*, refs/pull/*/head ]
     secrets: [ sftp_cache_username, sftp_cache_private_key, sftp_cache_server, sftp_cache_path ]
     restore: true
     mount:
@@ -78,6 +82,8 @@ pipeline:
   rebuild_cache:
     image: appleboy/drone-sftp-cache
     secrets: [ sftp_cache_username, sftp_cache_private_key, sftp_cache_server, sftp_cache_path ]
+    when:
+      ref: [ refs/heads/master, refs/tags/*, refs/pull/*/head ]
     rebuild: true
     mount:
       - /drone/.ivy2/cache
