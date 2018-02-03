@@ -169,6 +169,16 @@ val bloop = project
     crossSbtVersions := Seq("1.0.3", "0.13.16")
   )
 
+// We define this project to get autocompletion in Intellij
+val globalPlugins = project
+  .in(file("global-plugins"))
+  .settings(
+    sbtPlugin := true,
+    skip in publish := true,
+    sourceDirectory := Keys.baseDirectory.value,
+    target := (target in bloop).value./("global-plugins")
+  )
+
 /***************************************************************************************************/
 /*                      This is the corner for all the command definitions                         */
 /***************************************************************************************************/
