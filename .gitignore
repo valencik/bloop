@@ -16,3 +16,7 @@ test-config.sbt
 base-directory
 integration-tests/integration-projects/**/test
 TestPlugin.scala
+
+# The local global directory points to the user home global dir with symlinks
+global-plugins
+.sbtopts
