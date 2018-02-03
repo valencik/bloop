@@ -1,4 +1,4 @@
-package me.vican.jorge.sbt.sourcedeps
+package ch.epfl.scala.sbt.sourcedeps
 
 import sbt.{AutoPlugin, Command, Def, Keys, PluginTrigger, Plugins, Task, ThisBuild}
 import sbt.io.syntax.fileToRichFile
