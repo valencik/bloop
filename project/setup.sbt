@@ -19,10 +19,11 @@ onLoad in Global := {
 
   val logger = Keys.sLog.value
   val setUpAlternativeGlobal = { (state: State) =>
-    val bloopBaseDir = (baseDirectory in ThisBuild).value.getParentFile.getParentFile
+    val bloopBaseDir = (baseDirectory in ThisBuild).value.getParentFile
     val sbtOptsFile = bloopBaseDir / ".sbtopts"
     val properties = new java.util.Properties
-    properties.load(new FileInputStream(sbtOptsFile))
+    if (sbtOptsFile.exists())
+      properties.load(new FileInputStream(sbtOptsFile))
     val globalBase = Option(properties.getProperty(SbtGlobalPlugins))
     if (globalBase.isDefined) state
     else {

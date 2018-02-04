@@ -2,24 +2,7 @@ package ch.epfl.scala.sbt.sourcedeps
 
 import java.io.File
 
-import sbt.{
-  AutoPlugin,
-  Compile,
-  Def,
-  Defaults,
-  Keys,
-  PluginTrigger,
-  Plugins,
-  Project,
-  ProjectDefinition,
-  ProjectOrigin,
-  ProjectRef,
-  RootProject,
-  Test,
-  ThisBuild,
-  file,
-  uri
-}
+import sbt.{AutoPlugin, ClasspathDependency, Compile, Def, Defaults, Keys, PluginTrigger, Plugins, Project, ProjectDefinition, ProjectOrigin, ProjectRef, RootProject, Test, ThisBuild, file, uri}
 import sbt.io.syntax.fileToRichFile
 import sbt.librarymanagement.{UpdateReport, UpdateStats}
 import sbt.librarymanagement.syntax.stringToOrganization
@@ -53,43 +36,32 @@ object SourceDependenciesPlugin extends AutoPlugin {
     Keys.internalDependencyClasspath in sbt.Runtime := Nil
   )
 
-  /**
-   * An override project only adds overrides to the original project and makes sure
-   * that sbt does not fully resolve all the settings for it (disabling core plugin
-   * makes the memory consumption of every project negligible!).
-   *
-   * @param proj The project which we want to override.
-   * @return The new derived project with the overrides.
-   */
-  def createOverride(proj: Project): Project = {
-    val overrideId = s"${proj.id}-override"
-    Project(proj.id, proj.base)
-      //.dependsOn(proj)
-      //.settings(Defaults.coreDefaultSettings)
-      //.settings(settingsToMakeSbtNotFail)
-      //.disablePlugins(CorePlugin)
-  }
-
   val baseDirectory = Option(System.getProperty("sbt.global.plugins"))
     .map(f => file(f).getParentFile)
     .getOrElse(sys.error("Missing `sbt.global.plugins` in .sbtopts!"))
-  def createProjectRef(proj: Project): ProjectRef = {
-    val base = proj.base.relativeTo(baseDirectory).getOrElse(proj.base)
-    ProjectRef(base, proj.id)
+
+  /**
+    * An override project only adds overrides to the original project and makes sure
+    * that sbt does not fully resolve all the settings for it (disabling core plugin
+    * makes the memory consumption of every project negligible!).
+    *
+    * @param proj The project which we want to override.
+    * @return The new derived project with the overrides.
+    */
+  def createOverride(proj: Project): Project = {
+    val overrideId = s"${proj.id}-override"
+    Project(overrideId, proj.base./("target")./(overrideId))
+      .dependsOn(ClasspathDependency(proj, None))
+      .settings(Defaults.coreDefaultSettings)
+      .settings(settingsToMakeSbtNotFail)
+      .disablePlugins(CorePlugin)
   }
+
 
   override def derivedProjects(proj: ProjectDefinition[_]): Seq[Project] = {
     proj match {
       case proj: Project if proj.projectOrigin != ProjectOrigin.DerivedProject =>
-        val ref = ProjectRef(proj.base, proj.id)
-        //val overrides = PluginImplementation.PluginDefaults.genProjectSettings(ref)
-        val overrides = List(
-          Keys.version := {
-            val oldVersion = Keys.version.value
-            println(oldVersion)
-            oldVersion
-          }
-        )
+        val overrides = PluginImplementation.PluginDefaults.genProjectSettings(proj)
         List(createOverride(proj).settings(overrides))
       case _ => super.derivedProjects(proj)
     }
@@ -132,16 +104,11 @@ object PluginImplementation {
       !isStable.map(stable => !stable || version.endsWith("-SNAPSHOT")).getOrElse(false)
     }
 
-    def genProjectSettings(ref: sbt.ProjectRef): Seq[Def.Setting[_]] =
+    def genProjectSettings(ref: Project): Seq[Def.Setting[_]] =
       inProject(ref)(
         List(
-          Keys.organization.in(ref) := "ch.epfl.scala",
-          Keys.version := {
-            val oldVersion = Keys.version.in(ref).value
-            println(oldVersion)
-            oldVersion
-          }
-          /*          Keys.homepage := {
+          Keys.organization := "ch.epfl.scala",
+          Keys.homepage := {
             val previousHomepage = Keys.homepage.in(ref).value
             if (previousHomepage.nonEmpty) previousHomepage
             else (Keys.homepage in ThisBuild).value
@@ -166,7 +133,7 @@ object PluginImplementation {
             val output = DynVerKeys.dynverGitDescribeOutput.in(ref).in(ThisBuild).value
             val version = Keys.version.in(ref).value
             publishDocAndSourceArtifact(output, version)
-          }*/
+          }
         ))
   }
   //) ++ sharedBuildPublishSettings ++ sharedProjectPublishSettings)
