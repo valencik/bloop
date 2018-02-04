@@ -149,8 +149,6 @@ object BuildKeys {
 object BuildImplementation {
   import sbt.{url, file}
   import sbt.{Developer, Resolver, Watched, Compile, Test}
-  import sbtdynver.GitDescribeOutput
-  import sbtdynver.DynVerPlugin.{autoImport => DynVerKeys}
   import bintray.BintrayKeys
 
   // This should be added to upstream sbt.
@@ -195,7 +193,8 @@ object BuildImplementation {
     Keys.testOptions in Test += sbt.Tests.Argument("-oD"),
     Keys.onLoadMessage := Header.intro,
     Keys.commands ~= BuildDefaults.fixPluginCross _,
-    Keys.onLoad := BuildDefaults.onLoad.value,
+    // Keys.onLoad := BuildDefaults.onLoad.value,
+    Keys.onLoad := {(state: sbt.State) => state},
     Keys.publishArtifact in Test := false,
     // Add resolver so that we can lazy publish modules that are only in bintray
     Keys.resolvers := {
@@ -228,7 +227,7 @@ object BuildImplementation {
     // Legal requirement: license and notice files must be in the published jar
     Keys.resources in Compile ++= BuildDefaults.getLicense.value,
     Keys.publishArtifact in Test := false,
-    Keys.publishArtifact in (Compile, Keys.packageDoc) := {
+/*    Keys.publishArtifact in (Compile, Keys.packageDoc) := {
       val output = DynVerKeys.dynverGitDescribeOutput.value
       val version = Keys.version.value
       BuildDefaults.publishDocAndSourceArtifact(output, version)
@@ -237,7 +236,7 @@ object BuildImplementation {
       val output = DynVerKeys.dynverGitDescribeOutput.value
       val version = Keys.version.value
       BuildDefaults.publishDocAndSourceArtifact(output, version)
-    },
+    },*/
     // Add some metadata that is useful to see in every bintray release
     BintrayKeys.bintrayPackageLabels := List("productivity", "build", "server", "cli", "tooling"),
     BintrayKeys.bintrayVersionAttributes ++= {
@@ -262,7 +261,7 @@ object BuildImplementation {
     /* This rounds off the trickery to set up those projects whose `overridingProjectSettings` have
      * been overriden because sbt has decided to initialize the settings from the sourcedep after. */
     val hijacked = sbt.AttributeKey[Boolean]("TheHijackedOptionOfBloop.")
-    val onLoad: Def.Initialize[State => State] = Def.setting { (state: State) =>
+/*    val onLoad: Def.Initialize[State => State] = Def.setting { (state: State) =>
       val globalSettings =
         List(Keys.onLoadMessage in sbt.Global := s"Setting up the integration builds.")
       def genProjectSettings(ref: sbt.ProjectRef) =
@@ -317,7 +316,7 @@ object BuildImplementation {
         val allSessionSettings = currentSessionSettings ++ currentSession.rawAppend
         extracted.append(globalSettings ++ projectSettings ++ allSessionSettings, hijackedState)
       }
-    }
+    }*/
 
     def fixPluginCross(commands: Seq[Command]): Seq[Command] = {
       val pruned = commands.filterNot(p => p == sbt.WorkingPluginCross.oldPluginSwitch)
@@ -417,19 +416,6 @@ object BuildImplementation {
         else throw new IllegalArgumentException(s"legal file $name must exist")
 
       Seq(fileWithFallback("LICENSE.md"), fileWithFallback("NOTICE.md"))
-    }
-
-    /**
-     * This setting figures out whether the version is a snapshot or not and configures
-     * the source and doc artifacts that are published by the build.
-     *
-     * Snapshot is a term with no clear definition. In this code, a snapshot is a revision
-     * that is dirty, e.g. has time metadata in its representation. In those cases, the
-     * build will not publish doc and source artifacts by any of the publishing actions.
-     */
-    def publishDocAndSourceArtifact(info: Option[GitDescribeOutput], version: String): Boolean = {
-      val isStable = info.map(_.dirtySuffix.value.isEmpty)
-      !isStable.map(stable => !stable || version.endsWith("-SNAPSHOT")).getOrElse(false)
     }
   }
 }

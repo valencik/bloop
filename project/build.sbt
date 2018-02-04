@@ -2,17 +2,17 @@ val mvnVersion = "3.5.2"
 val mvnPluginToolsVersion = "3.5"
 val root = project
   .in(file("."))
-  .dependsOn(RootProject(uri("git://github.com/scalacenter/sbt-release-early#d5a820af6c678e6961c7d77f7cecfbb972d4d97a")))
+  //.dependsOn(RootProject(uri("git://github.com/scalacenter/sbt-release-early#d5a820af6c678e6961c7d77f7cecfbb972d4d97a")))
   .settings(
     scalaVersion := "2.12.4",
     resolvers += Resolver.sonatypeRepo("staging"),
-    addSbtPlugin("ohnosequences" % "sbt-github-release" % "0.6.0"),
+    addSbtPlugin("ohnosequences" % "sbt-github-release" % "0.6.1"),
     addSbtPlugin("com.lucidchart" % "sbt-scalafmt" % "1.14"),
     addSbtPlugin("com.eed3si9n" % "sbt-buildinfo" % "0.7.0"),
     addSbtPlugin("pl.project13.scala" % "sbt-jmh" % "0.2.27"),
     addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6"),
     addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.9.3"),
-    //addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.1.0"),
+    addSbtPlugin("ch.epfl.scala" % "sbt-release-early" % "2.1.0"),
     addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.1"),
     // Let's add our sbt plugin to the sbt too ;)
     unmanagedSourceDirectories in Compile ++= {
@@ -35,5 +35,6 @@ val root = project
       "org.apache.maven" % "maven-model-builder" % mvnVersion,
     ),
     // 5 hours to find that this had to be overridden because conflicted with sbt-pom-reader
-    dependencyOverrides ++= List("org.apache.maven" % "maven-settings" % mvnVersion)
+    dependencyOverrides ++= List("org.apache.maven" % "maven-settings" % mvnVersion),
+    libraryDependencies += "org.scala-sbt" %% "scripted-plugin" % sbtVersion.value,
   )
