@@ -2,7 +2,7 @@ package bloop.engine.tasks
 
 import bloop.cli.ExitStatus
 import bloop.engine.{Dag, State}
-import bloop.exec.ProcessConfig
+import bloop.exec.ForkProcess
 import bloop.io.AbsolutePath
 import bloop.reporter.{Reporter, ReporterConfig}
 import bloop.testing.{DiscoveredTests, TestInternals}
@@ -196,7 +196,7 @@ object Tasks {
     val projectsToTest = if (isolated) List(project) else Dag.dfs(state.build.getDagFor(project))
     projectsToTest.foreach { project =>
       val projectName = project.name
-      val processConfig = ProcessConfig(project.javaEnv, project.classpath)
+      val processConfig = ForkProcess(project.javaEnv, project.classpath)
       val testLoader = processConfig.toExecutionClassLoader(Some(TestInternals.filteredLoader))
       val frameworks = project.testFrameworks
         .flatMap(fname => TestInternals.getFramework(testLoader, fname.toList, logger))
@@ -232,10 +232,10 @@ object Tasks {
    */
   def run(state: State, project: Project, className: String, args: Array[String]): State = {
     val classpath = project.classpath
-    val processConfig = ProcessConfig(project.javaEnv, classpath)
+    val processConfig = ForkProcess(project.javaEnv, classpath)
     val exitCode = processConfig.runMain(className, args, state.logger)
     val exitStatus = {
-      if (exitCode == ProcessConfig.EXIT_OK) ExitStatus.Ok
+      if (exitCode == ForkProcess.EXIT_OK) ExitStatus.Ok
       else ExitStatus.UnexpectedError
     }
 
