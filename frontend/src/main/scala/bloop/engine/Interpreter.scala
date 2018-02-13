@@ -144,7 +144,8 @@ object Interpreter {
         // Note that we always compile incrementally for test execution
         val reporter = ReporterConfig.toFormat(cmd.reporter)
         val state1 = Tasks.compile(state, project, reporter)
-        Tasks.test(state1, project, cmd.isolated)
+        val cwd = cmd.cliOptions.common.workingPath
+        Tasks.test(state1, project, cwd, cmd.isolated)
       }
 
       if (!cmd.watch) run(state)
@@ -207,7 +208,8 @@ object Interpreter {
         selectedMainClass
           .map { main =>
             val args = cmd.args.toArray
-            Tasks.run(compiledState, project, main, args)
+            val cwd = cmd.cliOptions.common.workingPath
+            Tasks.run(compiledState, project, cwd, main, args)
           }
           .getOrElse(compiledState.mergeStatus(ExitStatus.UnexpectedError))
       }

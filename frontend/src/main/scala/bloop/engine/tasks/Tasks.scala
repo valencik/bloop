@@ -185,10 +185,11 @@ object Tasks {
    *
    * @param state The current state of Bloop.
    * @param project The project for which to run the tests.
+   * @param cwd      The directory in which to start the forked JVM.
    * @param isolated Do not run the tests for the dependencies of `project`.
    * @return The new state of Bloop.
    */
-  def test(state: State, project: Project, isolated: Boolean): State = {
+  def test(state: State, project: Project, cwd: AbsolutePath, isolated: Boolean): State = {
     // TODO(jvican): This method should cache the test loader always.
     import state.logger
     import bloop.util.JavaCompat.EnrichOptional
@@ -215,7 +216,7 @@ object Tasks {
           .flatMap(defs => defs.map(_.fullyQualifiedName()))
           .toList
       logger.debug(s"Bloop found the following tests for ${projectName}: $allTestNames.")
-      TestInternals.executeTasks(processConfig, discoveredTests, eventHandler, logger)
+      TestInternals.executeTasks(cwd, processConfig, discoveredTests, eventHandler, logger)
     }
 
     // Return the previous state, test execution doesn't modify it.
@@ -227,13 +228,18 @@ object Tasks {
    *
    * @param state     The current state of Bloop.
    * @param project   The project to run.
+   * @param cwd       The directory in which to start the forked JVM.
    * @param className The fully qualified name of the main class.
    * @param args      The arguments to pass to the main class.
    */
-  def run(state: State, project: Project, className: String, args: Array[String]): State = {
+  def run(state: State,
+          project: Project,
+          cwd: AbsolutePath,
+          className: String,
+          args: Array[String]): State = {
     val classpath = project.classpath
     val processConfig = ForkProcess(project.javaEnv, classpath)
-    val exitCode = processConfig.runMain(className, args, state.logger)
+    val exitCode = processConfig.runMain(cwd, className, args, state.logger)
     val exitStatus = {
       if (exitCode == ForkProcess.EXIT_OK) ExitStatus.Ok
       else ExitStatus.UnexpectedError
