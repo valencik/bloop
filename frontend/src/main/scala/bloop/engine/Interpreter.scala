@@ -4,6 +4,7 @@ import bloop.cli.{CliOptions, Commands, ExitStatus}
 import bloop.io.SourceWatcher
 import bloop.io.Timer.timed
 import bloop.reporter.ReporterConfig
+import bloop.testing.TestInternals
 import bloop.engine.tasks.Tasks
 import bloop.Project
 import bloop.bsp.BspServer
@@ -142,9 +143,10 @@ object Interpreter {
     def compileAndTest(state: State, project: Project): State = {
       def run(state: State) = {
         // Note that we always compile incrementally for test execution
+        val testFilter = TestInternals.parseFilters(cmd.filter)
         val reporter = ReporterConfig.toFormat(cmd.reporter)
         val state1 = Tasks.compile(state, project, reporter)
-        Tasks.test(state1, project, cmd.isolated)
+        Tasks.test(state1, project, cmd.isolated, testFilter)
       }
 
       if (!cmd.watch) run(state)
