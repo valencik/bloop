@@ -363,6 +363,7 @@ object BuildImplementation {
   import scala.sys.process.Process
   val integrationSetUpBloop = Def.task {
     import sbt.MessageOnlyException
+    import java.util.Locale
 
     val buildIntegrationsBase = BuildKeys.buildIntegrationsBase.value
     val buildIndexFile = BuildKeys.buildIntegrationsIndex.value
@@ -374,6 +375,8 @@ object BuildImplementation {
 
     val cachedGenerate =
       FileFunction.cached(cacheDirectory, sbt.util.FileInfo.hash) { builds =>
+        val isWindows: Boolean =
+          System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("windows")
         val globalPluginsBase = buildIntegrationsBase / "global"
         val globalSettingsBase = globalPluginsBase / "settings"
         val stagingProperty = s"-D${BuildPaths.StagingProperty}=${stagingBase}"
@@ -382,7 +385,8 @@ object BuildImplementation {
         val indexProperty = s"-Dbloop.integrations.index=${buildIndexFile.getAbsolutePath}"
         val properties = stagingProperty :: indexProperty :: pluginsProperty :: settingsProperty :: Nil
         val toRun = "installBloop" :: "buildIndex" :: Nil
-        val cmd = "sbt" :: (properties ++ toRun)
+        val cmdBase = if (isWindows) "cmd.exe" :: "/C" :: "sbt.bat" :: Nil else "sbt" :: Nil
+        val cmd = cmdBase ::: properties ::: toRun
 
         IO.delete(buildIndexFile)
 
