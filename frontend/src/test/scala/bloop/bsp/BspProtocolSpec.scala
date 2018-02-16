@@ -8,7 +8,7 @@ import bloop.engine.Run
 import bloop.io.AbsolutePath
 import bloop.tasks.ProjectHelpers
 import ch.epfl.`scala`.bsp.schema.WorkspaceBuildTargetsRequest
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import ch.epfl.scala.bsp.endpoints
 import org.langmeta.lsp.LanguageClient
 
@@ -54,6 +54,7 @@ class BspProtocolSpec {
     test(10)
   }
 
+  @Ignore
   @Test def TestInitializationViaLocal(): Unit = {
     testInitialization(createLocalBspCommand(configDir))
   }
@@ -70,6 +71,7 @@ class BspProtocolSpec {
     BspClientTest.runTest(bsp, configDir)(c => clientWork(c))
   }
 
+  @Ignore
   @Test def TestBuildTargetsViaLocal(): Unit = {
     testBuildTargets(createLocalBspCommand(configDir))
   }
