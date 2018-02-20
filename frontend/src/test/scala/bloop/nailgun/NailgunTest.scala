@@ -3,6 +3,7 @@ package bloop.nailgun
 import org.junit.Assert.{assertEquals, assertNotEquals}
 
 import java.nio.file.{Files, Path, Paths}
+import java.util.Locale
 
 import bloop.Server
 import bloop.exec.MultiplexedStreams
@@ -81,7 +82,12 @@ abstract class NailgunTest {
     assert(Files.exists(Paths.get(clientPath)), s"Couldn't find Nailgun client at '$clientPath'.")
 
     private def processBuilder(cmd: Seq[String]): ProcessBuilder = {
-      new ProcessBuilder((clientPath +: s"--nailgun-port=$port" +: cmd): _*)
+      val isWindows: Boolean =
+        System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("windows")
+      val cmdBase =
+        if (isWindows) "python" :: clientPath.toString :: Nil
+        else clientPath.toString :: Nil
+      new ProcessBuilder((cmdBase ++ (s"--nailgun-port=$port" +: cmd)): _*)
         .directory(base.toFile)
     }
 
