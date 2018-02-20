@@ -3,7 +3,7 @@ package bloop.exec
 import bloop.logging.{Logger, RecordingLogger}
 
 import org.junit.Test
-import org.junit.Assert.assertEquals
+import org.junit.Assert.{assertEquals, assertTrue}
 import org.junit.experimental.categories.Category
 
 @Category(Array(classOf[bloop.FastTests]))
@@ -19,9 +19,14 @@ class MultiplexedStreamsSpec {
       System.err.println("stderr")
     }
     val messages = logger.getMessages
+    val stdoutNeedle = ("info", "stdout")
+    val stderrNeedle = ("error", "stderr")
+
     assertEquals(2, messages.length.toLong)
-    assert(messages.contains(("info", s"stdout")))
-    assert(messages.contains(("error", s"stderr")))
+    assertTrue(s"${messages.mkString("\n")} didn't contain $stdoutNeedle",
+               messages.contains(stdoutNeedle))
+    assertTrue(s"${messages.mkString("\n")} didn't contain $stderrNeedle",
+               messages.contains(stderrNeedle))
   }
 
   @Test
@@ -45,10 +50,15 @@ class MultiplexedStreamsSpec {
     val messagesT0 = l0.getMessages
     val messagesT1 = l1.getMessages
 
+    val expectedT0 = ("info", t0Name)
+    val expectedT1 = ("info", t1Name)
+
     assertEquals(10, messagesT0.length.toLong)
     assertEquals(10, messagesT1.length.toLong)
-    assert(messagesT0.forall(_ == (("info", t0Name))))
-    assert(messagesT1.forall(_ == (("info", t1Name))))
+    assertTrue(s"${messagesT0.mkString("\n")} were not all $expectedT0",
+               messagesT0.forall(_ == expectedT0))
+    assertTrue(s"${messagesT1.mkString("\n")} were not all $expectedT1",
+               messagesT1.forall(_ == expectedT1))
   }
 
   private class TestThread(monitor: Object, logger: Logger, name: String) extends Thread {
